@@ -5,4 +5,4 @@ class String:
         print(self.Input.upper())
 x = String()
 x.getString()
-x.printString()
+x.printString() 
