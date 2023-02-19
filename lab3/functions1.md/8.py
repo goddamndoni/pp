@@ -11,6 +11,8 @@ def spy_game(nums):
             return True
     return False
 x = []
-a = list(map(int,input().split()))
-x.append(a)
+n = int(input())
+for i in range(n):
+    a = int(input())
+    x.append(a)
 print(spy_game(x))
