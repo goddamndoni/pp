@@ -1,4 +1,4 @@
-#Imports
+# Imports
 import pygame, sys
 from pygame.locals import *
 import random, time
@@ -21,23 +21,25 @@ WHITE = (255, 255, 255)
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
 SPEED = 5
-COINSPEED = 5
 SCORE = 0
-COINS = 0
-
+MONEY = 0
 #Setting up Fonts
 font = pygame.font.SysFont("Verdana", 60)
 font_small = pygame.font.SysFont("Verdana", 20)
 game_over = font.render("Game Over", True, BLACK)
 
 background = pygame.image.load("AnimatedStreet.png")
-
+music = pygame.mixer.Sound(r'C:\Users\123\Documents\lab3\pp\lab8\racer\sounds\background.wav').play(-1)
 #Create a white screen 
-DISPLAYSURF = pygame.display.set_mode((400,600))
-DISPLAYSURF.fill(WHITE)
+sc = pygame.display.set_mode((400,600))
+sc.fill(WHITE)
 pygame.display.set_caption("Game")
+pygame.display.set_caption("Racer")
+coin_surf = pygame.image.load("coin.png")
+coin_surf = pygame.transform.scale(coin_surf, (coin_surf.get_width()//8 ,coin_surf.get_height()//8))
 
-# creating an enemy class
+x,x1, = None,None
+
 class Enemy(pygame.sprite.Sprite):
       def __init__(self):
         super().__init__() 
@@ -47,13 +49,30 @@ class Enemy(pygame.sprite.Sprite):
 
       def move(self):
         global SCORE
+        global x
         self.rect.move_ip(0,SPEED)
-        if (self.rect.bottom > 600): # if our enemy will be on the bottom of our screen it will be respawned
+        if (self.rect.bottom > 600):
             SCORE += 1
             self.rect.top = 0
             self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), 0)
+            x = self.rect.center
 
-# creating a player class
+class coin(pygame.sprite.Sprite):
+      def __init__(self):
+        super().__init__() 
+        self.image = pygame.image.load("coin.png")
+        self.image = pygame.transform.scale(coin_surf, (coin_surf.get_width()//1 ,coin_surf.get_height()//1))
+        self.rect = self.image.get_rect()
+        self.rect.center = (random.randint(40,SCREEN_WIDTH-40), 0)
+
+      def move(self):
+        global x1
+        self.rect.move_ip(0,SPEED)
+        if (self.rect.bottom > 600):
+            self.rect.top = 0
+            self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), 0)
+            x1 = self.rect.center
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__() 
@@ -63,7 +82,7 @@ class Player(pygame.sprite.Sprite):
        
     def move(self):
         pressed_keys = pygame.key.get_pressed()
-        
+    
         if self.rect.left > 0:
               if pressed_keys[K_LEFT]:
                   self.rect.move_ip(-5, 0)
@@ -71,95 +90,85 @@ class Player(pygame.sprite.Sprite):
               if pressed_keys[K_RIGHT]:
                   self.rect.move_ip(5, 0)
 
-# creating a coin class
-class Coin(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__() 
-        self.image = pygame.image.load("coin.png")
-        self.image = pygame.transform.scale(self.image, (40, 40))
-        self.rect = self.image.get_rect()
-        self.rect.center = (random.randint(40,SCREEN_WIDTH-40), 0)
-
-    def move(self):
-        global COINS
-        self.rect.move_ip(0,COINSPEED)
-        if (self.rect.bottom > 600): # if our coin will go under the screen it will be respawned
-            self.rect.top = 0
-            self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), 0)
-                  
-
 #Setting up Sprites        
 P1 = Player()
 E1 = Enemy()
-COIN = Coin()
-
+E2 = coin()
 #Creating Sprites Groups
 enemies = pygame.sprite.Group()
 enemies.add(E1)
 coins = pygame.sprite.Group()
-coins.add(COIN)
+coins.add(E2)
 all_sprites = pygame.sprite.Group()
 all_sprites.add(P1)
 all_sprites.add(E1)
-all_sprites.add(COIN)
+
+
 
 #Adding a new User event 
 INC_SPEED = pygame.USEREVENT + 1
 pygame.time.set_timer(INC_SPEED, 1000)
 
+s = 0
+
 #Game Loop
 while True:
-      
     #Cycles through all events occuring  
     for event in pygame.event.get():
         if event.type == INC_SPEED:
-              SPEED += 0.5      
+              SPEED += 0.5   
+            #   y -= 0.5   
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
 
-    DISPLAYSURF.blit(background, (0,0))
-    scores = font_small.render(str(SCORE), True, BLACK)
-    DISPLAYSURF.blit(scores, (10,10))
-    collected = font_small.render(str(SCORE), True, BLACK)
-    DISPLAYSURF.blit(scores, (400 - 30,10))
+    # анимируем движущийся фон
+    sc.blit(pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT)), (0, s % SCREEN_HEIGHT))
+    sc.blit(pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT)), (0, -SCREEN_HEIGHT + (s % SCREEN_HEIGHT)))
+    s += SPEED / 2
     
+    scores = font_small.render(str(SCORE), True, BLACK)
+    sc.blit(scores, (10,575))
 
     #Moves and Re-draws all Sprites
     for entity in all_sprites:
         entity.move()
-        DISPLAYSURF.blit(entity.image, entity.rect)
+        sc.blit(entity.image, entity.rect)
         
 
     #To be run if collision occurs between Player and Enemy
     if pygame.sprite.spritecollideany(P1, enemies):
-          pygame.mixer.Sound('crash.wav').play()
+          pygame.mixer.Sound(r'C:\Users\123\Documents\lab3\pp\lab8\racer\sounds\crash.wav').play()
           time.sleep(1)
                    
-          DISPLAYSURF.fill(RED)
-          DISPLAYSURF.blit(game_over, (30,250))
+          sc.fill(RED)
+          sc.blit(game_over, (30,250))
           
           pygame.display.update()
+          pygame.mixer.pause() # останавливаем музыку
           for entity in all_sprites:
                 entity.kill() 
+          pygame.mixer.Sound(r"C:\Users\123\Documents\lab3\pp\lab8\racer\sounds\background.wav").play()
           time.sleep(2)
           pygame.quit()
           sys.exit()        
 
-    # if our player will collide with the coin object what will be:
-    # the collecting sound will be played
-    # the coin object will be destroyed
-    if pygame.sprite.spritecollideany(P1, coins):
-            pygame.mixer.Sound('collect.wav').play()
-            for coin in coins:
-                coin.kill()
-        #   time.sleep(1)
-            COINS += 1
-            pygame.display.update() 
-    if(len(coins) == 0): # if our coin was collected:
-        COIN = Coin()   # new coin object will be created and added to the coins group
-        coins.add(COIN)
-        all_sprites.add(COIN)
-
+    for entity in coins:
+        entity.move()
+        sc.blit(entity.image, entity.rect)
+    
+    if pygame.sprite.spritecollideany(E1, coins):
+        E2.center = (random.randint(30, SCREEN_WIDTH - 30), 0)
+    if pygame.sprite.spritecollideany(P1,coins):
+        pygame.mixer.Sound(r'C:\Users\123\Documents\lab3\pp\lab8\racer\sounds\collect.wav').play()
+        x != x1
+    for c in coins:
+        if pygame.sprite.collide_rect(P1,c): # если игровая машинка получит монетку
+            c.kill() 
+            MONEY+= 200
+            new = coin() # заново создаем объект монетки
+            coins.add(new) # добавляем новый объект в группу 
+    money = font_small.render(str(MONEY),True, BLACK)
+    sc.blit(money, (200,10))
     pygame.display.update()
     FramePerSec.tick(FPS)
