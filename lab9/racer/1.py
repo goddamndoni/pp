@@ -52,16 +52,17 @@ class Enemy(pygame.sprite.Sprite):
         global x
         self.rect.move_ip(0,SPEED)
         if (self.rect.bottom > 600):
-            SCORE += 1
+            SCORE += 2
             self.rect.top = 0
             self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), 0)
             x = self.rect.center
 
 class coin(pygame.sprite.Sprite):
       def __init__(self):
+        a = random.uniform(0.4, 1.2)
         super().__init__() 
         self.image = pygame.image.load("coin.png")
-        self.image = pygame.transform.scale(coin_surf, (coin_surf.get_width()//1 ,coin_surf.get_height()//1))
+        self.image = pygame.transform.scale(coin_surf, (coin_surf.get_width()//a,coin_surf.get_height()//a))
         self.rect = self.image.get_rect()
         self.rect.center = (random.randint(40,SCREEN_WIDTH-40), 0)
 
@@ -116,7 +117,7 @@ while True:
     #Cycles through all events occuring  
     for event in pygame.event.get():
         if event.type == INC_SPEED:
-              SPEED += 0.5   
+              SPEED += 0.5  
             #   y -= 0.5   
         if event.type == QUIT:
             pygame.quit()
