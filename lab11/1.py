@@ -88,17 +88,17 @@ a = input('search\ninsert\ninsertloop\ndelete\npaginating\n')
 if a == 'search':
     cur.execute("SELECT search_from_book('Danabek', '87074830395')")
     result = cur.fetchall()
-    print(result[0])
+    print(result)
 if a == 'insert':
-    cur.execute("CALL insert_to_book('Nyssanov Kakimbek','87774545505')")
+    cur.execute("CALL insert_to_book('Danabek', '87074830395')")
 if a == 'insertloop':
     cur.execute('''CALL insert_list_of_users(ARRAY[
-    ARRAY['Neymar JR', '87076052769'],
-    ARRAY['Vini JR', '87079815569'],
-    ARRAY['Raphinha', '87074793780']
+    ARRAY['John Jones', '87076052769'],
+    ARRAY['Johny Thinker', '87079815569'],
+    ARRAY['Trolley', '87074793780']
 ]);''')
 if a == 'delete':
-    cur.execute("CALL delete_from_book ('Raphinha')")
+    cur.execute("CALL delete_from_book ('Trolley')")
 if a == 'paginating':
     cur.execute(
         '''SELECT * FROM paginatingfrom(6, 0);'''
