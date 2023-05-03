@@ -10,11 +10,11 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 cur.execute(
-    '''CREATE OR REPLACE FUNCTION search_from_book(a VARCHAR, b VARCHAR)
+    '''CREATE OR REPLACE FUNCTION search_from_book(a VARCHAR)
       RETURNS SETOF book 
    AS
    $$
-      SELECT * FROM book WHERE name = a AND phone = b;
+      SELECT * FROM book WHERE name = a;
    $$
    language sql;
    '''
@@ -86,11 +86,17 @@ language sql;""")
 
 a = input('search\ninsert\ninsertloop\ndelete\npaginating\n')
 if a == 'search':
-    cur.execute("SELECT search_from_book('Danabek', '87074830395')")
+    print('Введите имя:')
+    name = input()
+    cur.execute(f"SELECT search_from_book(\'{name}\')")
     result = cur.fetchall()
     print(result)
 if a == 'insert':
-    cur.execute("CALL insert_to_book('Danabek', '87074830395')")
+    print('Введите имя:')
+    name=input()
+    print('Введите номер:')
+    number=input()
+    cur.execute(f"CALL insert_to_book(\'{name}\',\'{number}\')")
 if a == 'insertloop':
     cur.execute('''CALL insert_list_of_users(ARRAY[
     ARRAY['John Jones', '87076052769'],
@@ -98,7 +104,8 @@ if a == 'insertloop':
     ARRAY['Trolley', '87074793780']
 ]);''')
 if a == 'delete':
-    cur.execute("CALL delete_from_book ('Trolley')")
+    name = input()
+    cur.execute(f"CALL delete_from_book (\'{name}\')")
 if a == 'paginating':
     cur.execute(
         '''SELECT * FROM paginatingfrom(6, 0);'''
